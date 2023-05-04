@@ -98,12 +98,30 @@ def make_move(board, move):
 
     return new_board
 
+def get_corner_values(array):
+    if array.ndim != 2:
+        raise ValueError("Only 2D arrays are supported.")
+    
+    rows, cols = array.shape
+    top_left = array[0, 0]
+    top_right = array[0, cols-1]
+    bottom_left = array[rows-1, 0]
+    bottom_right = array[rows-1, cols-1]
+    
+    return np.array([top_left, top_right, bottom_left, bottom_right]).max()
+
 def score_board(board):
     # A simple heuristic to score the board based on the highest tile and number of empty cells
     highest_tile = np.max(board)
     empty_cells = np.sum(board == 0)
+    int_board = np.array(board)
     
-    return highest_tile + empty_cells
+    if (np.max(board) == get_corner_values(int_board)):
+        extra_value = int_board.max() * 5
+    else:
+        extra_value = -int_board.max()
+    
+    return highest_tile + (empty_cells**3) + extra_value
 
 def minimax(board, depth, maximizing_player, alpha, beta):
     if depth == 0 or is_game_over(board):
